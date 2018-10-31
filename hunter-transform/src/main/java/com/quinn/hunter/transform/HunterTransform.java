@@ -89,15 +89,23 @@ public class HunterTransform extends Transform {
         logger.info(getName() + " isIncremental > " + isIncremental + " runVariant > " + runVariant + " emptyRun > " + emptyRun);
         long startTime = System.currentTimeMillis();
         if(!isIncremental) {
+            File incrementalFolder = new File("/Users/apple/Documents/workspace/leaking/Hunter/hunter-okhttp-example/build/intermediates/transforms/OkHttpHunterTransform/debug");
+            if(incrementalFolder.exists() && incrementalFolder.isDirectory()) {
+                logger.info("before delete outputProvider " + incrementalFolder.listFiles().length);
+            }
             outputProvider.deleteAll();
+            if(incrementalFolder.exists() && incrementalFolder.isDirectory()) {
+                logger.info("after delete outputProvider " + incrementalFolder.listFiles().length);
+            }
         }
         URLClassLoader urlClassLoader = ClassLoaderHelper.getClassLoader(inputs, referencedInputs, project);
         this.bytecodeWeaver.setClassLoader(urlClassLoader);
         for(TransformInput input : inputs) {
             for(JarInput jarInput : input.getJarInputs()) {
                 Status status = jarInput.getStatus();
+                logger.info("jarInput name " + jarInput.getName());
                 File dest = outputProvider.getContentLocation(
-                        jarInput.getFile().getAbsolutePath(),
+                        jarInput.getName(),
                         jarInput.getContentTypes(),
                         jarInput.getScopes(),
                         Format.JAR);
@@ -190,6 +198,7 @@ public class HunterTransform extends Transform {
 
     private void transformJar(final File srcJar, final File destJar, Status status) {
         waitableExecutor.execute(() -> {
+            logger.info("copy from " + srcJar.getAbsolutePath() + " to " + destJar.getAbsolutePath());
             if(emptyRun) {
                 FileUtils.copyFile(srcJar, destJar);
                 return null;
