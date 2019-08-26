@@ -8,6 +8,7 @@ import android.util.Log;
 import com.hunter.library.debug.HunterDebug;
 import com.hunter.library.debug.HunterDebugImpl;
 import com.hunter.library.debug.HunterLoggerHandler;
+import com.quinn.hunter.debug.test.ClassTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,13 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            testVoidMethodWithException();
+        } catch (Exception error) {
+        }
+        ClassTest classTest = new ClassTest();
+        classTest.test1(1);
+        ClassTest.test4(this);
     };
 
     @HunterDebugImpl
@@ -146,6 +154,11 @@ public class MainActivity extends Activity {
         }
         int result = a / 0;
         return result;
+    }
+
+    @HunterDebug
+    private void testVoidMethodWithException(){
+        throw new RuntimeException("not impl");
     }
 
 }

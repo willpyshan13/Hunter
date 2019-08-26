@@ -17,7 +17,7 @@ public final class DebugMethodAdapter extends LocalVariablesSorter implements Op
     private List<Parameter> parameters;
     private String className;
     private String methodName;
-    private boolean debugMethod = false;
+    private boolean debugMethod = true;
     private boolean debugMethodWithCustomLogger = false;
     private int timingStartVarIndex;
     private String methodDesc;
@@ -35,16 +35,21 @@ public final class DebugMethodAdapter extends LocalVariablesSorter implements Op
         this.methodDesc = desc;
     }
 
-    @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        AnnotationVisitor defaultAv = super.visitAnnotation(desc, visible);
-        if("Lcom/hunter/library/debug/HunterDebug;".equals(desc)) {
-            debugMethod = true;
-        } else if("Lcom/hunter/library/debug/HunterDebugImpl;".equals(desc)){
-            debugMethodWithCustomLogger = true;
-        }
-        return defaultAv;
+
+    public void switchToDebugImpl(){
+        debugMethod = false;
+        debugMethodWithCustomLogger = true;
     }
+//    @Override
+//    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+//        AnnotationVisitor defaultAv = super.visitAnnotation(desc, visible);
+//        if("Lcom/hunter/library/debug/HunterDebug;".equals(desc)) {
+//            debugMethod = true;
+//        } else if("Lcom/hunter/library/debug/HunterDebugImpl;".equals(desc)){
+//            debugMethodWithCustomLogger = true;
+//        }
+//        return defaultAv;
+//    }
 
     @Override
     public void visitCode() {
@@ -100,6 +105,9 @@ public final class DebugMethodAdapter extends LocalVariablesSorter implements Op
             //store origin return value
             int resultTempValIndex = -1;
             if(returnType != Type.VOID_TYPE || opcode == ATHROW) {
+                if(opcode == ATHROW){
+                    returnType = Type.getReturnType("Ljava/lang/Object;");
+                }
                 resultTempValIndex = newLocal(returnType);
                 int storeOpcocde = Utils.getStoreOpcodeFromType(returnType);
                 if(opcode == ATHROW) storeOpcocde = ASTORE;
